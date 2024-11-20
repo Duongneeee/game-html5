@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Crossy road game</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- <div id="box-ranking">
+
+    </div> -->
+    
+    <div id="counter">0</div>
+
+    <div id="controlls">
+      <div>
+        <button id="forward">
+          <svg width="30" height="30" viewBox="0 0 10 10">
+            <g transform="rotate(0, 5,5)">
+              <path d="M5,4 L7,6 L3,6 L5,4" />
+            </g>
+          </svg>
+        </button>
+        <button id="left">
+          <svg width="30" height="30" viewBox="0 0 10 10">
+            <g transform="rotate(-90, 5,5)">
+              <path d="M5,4 L7,6 L3,6 L5,4" />
+            </g>
+          </svg>
+        </button>
+        <button id="backward">
+          <svg width="30" height="30" viewBox="0 0 10 10">
+            <g transform="rotate(180, 5,5)">
+              <path d="M5,4 L7,6 L3,6 L5,4" />
+            </g>
+          </svg>
+        </button>
+        <button id="right">
+          <svg width="30" height="30" viewBox="0 0 10 10">
+            <g transform="rotate(90, 5,5)">
+              <path d="M5,4 L7,6 L3,6 L5,4" />
+            </g>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div id="box-score">
+      <div id="detal-score">
+        <h3 class="over-game">Over game</h3>
+        <div>
+          <div class="">
+            <p>Score</p>
+            <p id="result-score">0</p>
+          </div>
+          <div>
+            <p>Best</p>
+            <p id="best-score">0</p>
+          </div>
+        </div>
+        <div>
+          <p>Color Grass</p>
+          <input type="color"/>
+        </div>
+        <div>
+          <p>Color Chicken</p>
+          <input type="color" id="colorPicker" />
+        </div>
+      </div>
+      <div id="start">
+        <button id="start-game">Start game</button>
+      </div>
+    </div>
+
+    <div id="end">
+      <button id="retry">Retry</button>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/99/three.min.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
