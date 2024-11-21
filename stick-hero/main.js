@@ -54,6 +54,8 @@ Array.prototype.last = function () {
   const canvas = document.getElementById("game");
   canvas.width = window.innerWidth; // Make the Canvas full screen
   canvas.height = window.innerHeight;
+  let drawBackgroundColor1 = "#BBD691";
+  let drawBackgroundColor2 = "#FEF1E1";
   
   const ctx = canvas.getContext("2d");
   
@@ -64,7 +66,25 @@ Array.prototype.last = function () {
   const detalScoreDOM =  document.getElementById("detal-score")
   const resultScoreDOM = document.getElementById("result-score");
   const bestScoreDOM = document.getElementById("best-score");
+  const colorButtons = document.querySelectorAll('.color-button');
+  const backgroundColorPaletteDOM = document.getElementById("background-color-palette");
   const scoreDOM = document.getElementById("score");
+
+  colorButtons.forEach(button => {
+    button.addEventListener('click', function() {
+        // Lấy màu từ thuộc tính data-color của nút
+        drawBackgroundColor1 = button.getAttribute('data-color');
+        drawBackgroundColor2 = button.getAttribute('data-color2');
+        
+        draw()
+
+        // Loại bỏ lớp 'selected' khỏi tất cả các nút
+        colorButtons.forEach(b => b.classList.remove('selected'));
+
+        // Thêm lớp 'selected' vào nút hiện tại
+        button.classList.add('selected');
+    });
+  });
   
   // Initialize layout
   resetGame();
@@ -452,12 +472,12 @@ Array.prototype.last = function () {
     });
   }
   
-  function drawBackground() {
+  function drawBackground(isDrawHill) {
     // Draw sky
     var gradient = ctx.createLinearGradient(0, 0, 0, window.innerHeight);
     // set màu nền
-    gradient.addColorStop(0, "#BBD691");
-    gradient.addColorStop(1, "#FEF1E1");
+    gradient.addColorStop(0, drawBackgroundColor1);
+    gradient.addColorStop(1, drawBackgroundColor2);
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
   
@@ -529,6 +549,7 @@ Array.prototype.last = function () {
   }
 
   startGameDOM.addEventListener("click", () => {
+    backgroundColorPaletteDOM.style.display = "none";
     startGameDOM.style.display = "none";
     detalScoreDOM.style.display = "none";
     document.body.style.cursor = "pointer";

@@ -17,12 +17,12 @@
       <div id="box-score">
         <div id="detal-score">
           <h3 class="over-game nosifer-regular">Over game</h3>
-          <div>
-            <div class="">
+          <div class="general-score d-flex-block">
+            <div class="d-flex-block">
               <p class="title-detal-score">Score</p>
               <p id="result-score" class="title-detal-score">0</p>
             </div>
-            <div>
+            <div class="d-flex-block">
               <p class="title-detal-score">Best</p>
               <p id="best-score" class="title-detal-score">0</p>
             </div>
@@ -37,6 +37,14 @@
             <p>Color Chicken</p>
             <input type="color" id="colorPicker" />
           </div> -->
+        </div>
+        <div id="background-color-palette">
+          <h3 class="over-game">Background color</h3>
+
+          <button class="color-button selected" style="background-color: #BBD691;" data-color="#BBD691" data-color2="#FEF1E1"></button>
+          <button class="color-button" style="background-color: #ff7e5f;" data-color="#ff7e5f" data-color2="#feb47b"></button>
+          <button class="color-button" style="background-color: #FFD700;" data-color="#FFD700" data-color2="#fce775"></button>
+          <button class="color-button" style="background-color: #A9A9A9;" data-color="#A9A9A9" data-color2="#00BFFF"></button>
         </div>
         <div id="start">
           <button id="start-game">Start game</button>
