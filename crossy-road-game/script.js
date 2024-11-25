@@ -49,22 +49,22 @@ let startMoving;
 let moves;
 let stepStartTimestamp;
 
-const carFrontTexture = new Texture(40, 80, [{ x: 0, y: 10, w: 30, h: 60 }]);
-const carBackTexture = new Texture(40, 80, [{ x: 10, y: 10, w: 30, h: 60 }]);
-const carRightSideTexture = new Texture(110, 40, [
+const carFrontTexture = new createCanvasTexture(40, 80, [{ x: 0, y: 10, w: 30, h: 60 }]);
+const carBackTexture = new createCanvasTexture(40, 80, [{ x: 10, y: 10, w: 30, h: 60 }]);
+const carRightSideTexture = new createCanvasTexture(110, 40, [
   { x: 10, y: 0, w: 50, h: 30 },
   { x: 70, y: 0, w: 30, h: 30 },
 ]);
-const carLeftSideTexture = new Texture(110, 40, [
+const carLeftSideTexture = new createCanvasTexture(110, 40, [
   { x: 10, y: 10, w: 50, h: 30 },
   { x: 70, y: 10, w: 30, h: 30 },
 ]);
 
-const truckFrontTexture = new Texture(30, 30, [{ x: 15, y: 0, w: 10, h: 30 }]);
-const truckRightSideTexture = new Texture(25, 30, [
+const truckFrontTexture = new createCanvasTexture(30, 30, [{ x: 15, y: 0, w: 10, h: 30 }]);
+const truckRightSideTexture = new createCanvasTexture(25, 30, [
   { x: 0, y: 15, w: 10, h: 10 },
 ]);
-const truckLeftSideTexture = new Texture(25, 30, [
+const truckLeftSideTexture = new createCanvasTexture(25, 30, [
   { x: 0, y: 5, w: 10, h: 10 },
 ]);
 
@@ -122,7 +122,7 @@ const laneSpeeds = [2, 2.5, 3];
 const vechicleColors = [0xa52523, 0xbdb638, 0x78b14b];
 const threeHeights = [20, 45, 60];
 
-const initaliseValues = () => {
+const resetGameValues = () => {
   lanes = generateLanes();
 
   currentLane = 0;
@@ -144,7 +144,7 @@ const initaliseValues = () => {
   dirLight.position.y = initialDirLightPositionY;
 };
 
-initaliseValues();
+resetGameValues();
 
 const renderer = new THREE.WebGLRenderer({
   alpha: true,
@@ -155,7 +155,7 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-function Texture(width, height, rects) {
+function createCanvasTexture(width, height, rects) {
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
@@ -170,19 +170,52 @@ function Texture(width, height, rects) {
 }
 
 function Wheel() {
-  const wheel = new THREE.Mesh(
-    new THREE.BoxBufferGeometry(12 * zoom, 33 * zoom, 12 * zoom),
-    new THREE.MeshLambertMaterial({ color: 0x333333, flatShading: true })
-  );
-  wheel.position.z = 6 * zoom;
-  return wheel;
+  // Helper function to create a wheel mesh
+  const createWheelMesh = () => {
+    const geometry = new THREE.BoxBufferGeometry(12 * zoom, 33 * zoom, 12 * zoom);
+    const material = new THREE.MeshLambertMaterial({ color: 0x333333, flatShading: true });
+    const wheelMesh = new THREE.Mesh(geometry, material);
+    wheelMesh.position.z = 6 * zoom;
+    return wheelMesh;
+  };
+
+  // Create and return the wheel mesh
+  return createWheelMesh();
 }
+
 
 function Car() {
   const car = new THREE.Group();
-  const color =
-    vechicleColors[Math.floor(Math.random() * vechicleColors.length)];
+  const color = getRandomVehicleColor();
 
+  // Create car body
+  const main = createCarMainBody(color);
+  car.add(main);
+
+  // Create car cabin
+  const cabin = createCarCabin();
+  car.add(cabin);
+
+  // Create wheels
+  const frontWheel = createWheel(-18); // front wheel position
+  car.add(frontWheel);
+
+  const backWheel = createWheel(18); // back wheel position
+  car.add(backWheel);
+
+  car.castShadow = true;
+  car.receiveShadow = false;
+
+  return car;
+}
+
+// Function to get a random vehicle color
+function getRandomVehicleColor() {
+  return vechicleColors[Math.floor(Math.random() * vechicleColors.length)];
+}
+
+// Function to create the main body of the car
+function createCarMainBody(color) {
   const main = new THREE.Mesh(
     new THREE.BoxBufferGeometry(60 * zoom, 30 * zoom, 15 * zoom),
     new THREE.MeshPhongMaterial({ color, flatShading: true })
@@ -190,8 +223,11 @@ function Car() {
   main.position.z = 12 * zoom;
   main.castShadow = true;
   main.receiveShadow = true;
-  car.add(main);
+  return main;
+}
 
+// Function to create the car cabin with textures
+function createCarCabin() {
   const cabin = new THREE.Mesh(
     new THREE.BoxBufferGeometry(33 * zoom, 24 * zoom, 12 * zoom),
     [
@@ -223,34 +259,65 @@ function Car() {
   cabin.position.z = 25.5 * zoom;
   cabin.castShadow = true;
   cabin.receiveShadow = true;
-  car.add(cabin);
+  return cabin;
+}
 
-  const frontWheel = new Wheel();
-  frontWheel.position.x = -18 * zoom;
-  car.add(frontWheel);
-
-  const backWheel = new Wheel();
-  backWheel.position.x = 18 * zoom;
-  car.add(backWheel);
-
-  car.castShadow = true;
-  car.receiveShadow = false;
-
-  return car;
+// Function to create a wheel at a given position
+function createWheel(positionX) {
+  const wheel = new Wheel();
+  wheel.position.x = positionX * zoom;
+  return wheel;
 }
 
 function Truck() {
   const truck = new THREE.Group();
-  const color =
-    vechicleColors[Math.floor(Math.random() * vechicleColors.length)];
+  const color = getRandomVehicleColor();
 
+  // Create the base of the truck
+  const base = createBase();
+  truck.add(base);
+
+  // Create the cargo of the truck
+  const cargo = createCargo();
+  truck.add(cargo);
+
+  // Create the cabin of the truck
+  const cabin = createCabin(color);
+  truck.add(cabin);
+
+  // Create the wheels of the truck
+  const frontWheel = createWheel(-38); // front wheel position
+  truck.add(frontWheel);
+
+  const middleWheel = createWheel(-10); // middle wheel position
+  truck.add(middleWheel);
+
+  const backWheel = createWheel(30); // back wheel position
+  truck.add(backWheel);
+
+  truck.castShadow = true;
+  truck.receiveShadow = false;
+
+  return truck;
+}
+
+// Function to get a random vehicle color
+function getRandomVehicleColor() {
+  return vechicleColors[Math.floor(Math.random() * vechicleColors.length)];
+}
+
+// Function to create the truck base (the main platform)
+function createBase() {
   const base = new THREE.Mesh(
     new THREE.BoxBufferGeometry(100 * zoom, 25 * zoom, 5 * zoom),
     new THREE.MeshLambertMaterial({ color: 0xb4c6fc, flatShading: true })
   );
   base.position.z = 10 * zoom;
-  truck.add(base);
+  return base;
+}
 
+// Function to create the cargo of the truck
+function createCargo() {
   const cargo = new THREE.Mesh(
     new THREE.BoxBufferGeometry(75 * zoom, 35 * zoom, 40 * zoom),
     new THREE.MeshPhongMaterial({ color: 0xb4c6fc, flatShading: true })
@@ -259,8 +326,11 @@ function Truck() {
   cargo.position.z = 30 * zoom;
   cargo.castShadow = true;
   cargo.receiveShadow = true;
-  truck.add(cargo);
+  return cargo;
+}
 
+// Function to create the cabin of the truck with different sides and textures
+function createCabin(color) {
   const cabin = new THREE.Mesh(
     new THREE.BoxBufferGeometry(25 * zoom, 30 * zoom, 30 * zoom),
     [
@@ -269,17 +339,17 @@ function Truck() {
         color,
         flatShading: true,
         map: truckFrontTexture,
-      }),
+      }), // front
       new THREE.MeshPhongMaterial({
         color,
         flatShading: true,
         map: truckRightSideTexture,
-      }),
+      }), // right side
       new THREE.MeshPhongMaterial({
         color,
         flatShading: true,
         map: truckLeftSideTexture,
-      }),
+      }), // left side
       new THREE.MeshPhongMaterial({ color, flatShading: true }), // top
       new THREE.MeshPhongMaterial({ color, flatShading: true }), // bottom
     ]
@@ -288,26 +358,32 @@ function Truck() {
   cabin.position.z = 20 * zoom;
   cabin.castShadow = true;
   cabin.receiveShadow = true;
-  truck.add(cabin);
+  return cabin;
+}
 
-  const frontWheel = new Wheel();
-  frontWheel.position.x = -38 * zoom;
-  truck.add(frontWheel);
-
-  const middleWheel = new Wheel();
-  middleWheel.position.x = -10 * zoom;
-  truck.add(middleWheel);
-
-  const backWheel = new Wheel();
-  backWheel.position.x = 30 * zoom;
-  truck.add(backWheel);
-
-  return truck;
+// Function to create a wheel at a specific position
+function createWheel(positionX) {
+  const wheel = new Wheel();
+  wheel.position.x = positionX * zoom;
+  return wheel;
 }
 
 function Three() {
   const three = new THREE.Group();
 
+  // Create tree trunk
+  const trunk = createTrunk();
+  three.add(trunk);
+
+  // Create tree crown with a random height
+  const crown = createCrown();
+  three.add(crown);
+
+  return three;
+}
+
+// Function to create the trunk of the tree
+function createTrunk() {
   const trunk = new THREE.Mesh(
     new THREE.BoxBufferGeometry(15 * zoom, 15 * zoom, 20 * zoom),
     new THREE.MeshPhongMaterial({ color: 0x4d2926, flatShading: true })
@@ -315,10 +391,12 @@ function Three() {
   trunk.position.z = 10 * zoom;
   trunk.castShadow = true;
   trunk.receiveShadow = true;
-  three.add(trunk);
+  return trunk;
+}
 
-  height = threeHeights[Math.floor(Math.random() * threeHeights.length)];
-
+// Function to create the crown of the tree with a random height
+function createCrown() {
+  const height = threeHeights[Math.floor(Math.random() * threeHeights.length)];
   const crown = new THREE.Mesh(
     new THREE.BoxBufferGeometry(30 * zoom, 30 * zoom, height * zoom),
     new THREE.MeshLambertMaterial({ color: 0x7aa21d, flatShading: true })
@@ -326,28 +404,37 @@ function Three() {
   crown.position.z = (height / 2 + 20) * zoom;
   crown.castShadow = true;
   crown.receiveShadow = false;
-  three.add(crown);
-
-  return three;
+  return crown;
 }
 
 function Chicken() {
   const chicken = new THREE.Group();
 
+  // Create chicken body
+  const body = createBody();
+  chicken.add(body);
+
+  // Create chicken rowel (foot)
+  const rowel = createRowel();
+  chicken.add(rowel);
+
+  return chicken;
+}
+
+// Function to create the body of the chicken
+function createBody() {
   const body = new THREE.Mesh(
-    new THREE.BoxBufferGeometry(
-      chickenSize * zoom,
-      chickenSize * zoom,
-      20 * zoom
-    ),
-    // color chicken
+    new THREE.BoxBufferGeometry(chickenSize * zoom, chickenSize * zoom, 20 * zoom),
     new THREE.MeshPhongMaterial({ color: 0xffffff, flatShading: true })
   );
   body.position.z = 10 * zoom;
   body.castShadow = true;
   body.receiveShadow = true;
-  chicken.add(body);
+  return body;
+}
 
+// Function to create the rowel (foot) of the chicken
+function createRowel() {
   const rowel = new THREE.Mesh(
     new THREE.BoxBufferGeometry(2 * zoom, 4 * zoom, 2 * zoom),
     new THREE.MeshLambertMaterial({ color: 0xf0619a, flatShading: true })
@@ -355,60 +442,65 @@ function Chicken() {
   rowel.position.z = 21 * zoom;
   rowel.castShadow = true;
   rowel.receiveShadow = false;
-  chicken.add(rowel);
-  return chicken;
+  return rowel;
 }
+
 
 function Road() {
   const road = new THREE.Group();
 
-  const createSection = (color) =>
-    new THREE.Mesh(
+  // Helper function to create a road section with a specific color and offset
+  const createSection = (color, offsetX = 0) => {
+    const section = new THREE.Mesh(
       new THREE.PlaneBufferGeometry(boardWidth * zoom, positionWidth * zoom),
       new THREE.MeshPhongMaterial({ color })
     );
+    section.position.x = offsetX;
+    return section;
+  };
 
-  const middle = createSection(0x454a59);
+  // Create the three sections of road: middle, left, and right
+  const middle = createSection(0x454a59); // Road color in the middle
   middle.receiveShadow = true;
   road.add(middle);
 
-  const left = createSection(0x393d49);
-  left.position.x = -boardWidth * zoom;
+  const left = createSection(0x393d49, -boardWidth * zoom); // Left road section
   road.add(left);
 
-  const right = createSection(0x393d49);
-  right.position.x = boardWidth * zoom;
+  const right = createSection(0x393d49, boardWidth * zoom); // Right road section
   road.add(right);
 
   return road;
 }
 
+
 function Grass() {
   const grass = new THREE.Group();
 
-  const createSection = (color) =>
-    new THREE.Mesh(
-      new THREE.BoxBufferGeometry(
-        boardWidth * zoom,
-        positionWidth * zoom,
-        3 * zoom
-      ),
+  // Helper function to create a grass section with a specific color
+  const createSection = (color, offsetX = 0) => {
+    const section = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(boardWidth * zoom, positionWidth * zoom, 3 * zoom),
       new THREE.MeshPhongMaterial({ color })
     );
-  // color Grass
-  const middle = createSection(0xbaf455);
+    section.position.x = offsetX;
+    return section;
+  };
+
+  // Create the three sections of grass: middle, left, and right
+  const middle = createSection(0xbaf455); // Grass color in the middle
   middle.receiveShadow = true;
   grass.add(middle);
 
-  const left = createSection(0x99c846);
-  left.position.x = -boardWidth * zoom;
+  const left = createSection(0x99c846, -boardWidth * zoom); // Left grass section
   grass.add(left);
 
-  const right = createSection(0x99c846);
-  right.position.x = boardWidth * zoom;
+  const right = createSection(0x99c846, boardWidth * zoom); // Right grass section
   grass.add(right);
 
+  // Adjust the z-position of the grass group
   grass.position.z = 1.5 * zoom;
+
   return grass;
 }
 
@@ -495,14 +587,14 @@ function Lane(index) {
 
 // document.querySelector("#retry").addEventListener("click", () => {
 //   lanes.forEach((lane) => scene.remove(lane.mesh));
-//   initaliseValues();
+//   resetGameValues();
 //   counterDOM.innerHTML = 0;
 //   endDOM.style.visibility = "hidden";
 // });
 
 document.querySelector("#start-game").addEventListener("click", () => {
   lanes.forEach((lane) => scene.remove(lane.mesh));
-  initaliseValues();
+  resetGameValues();
   counterDOM.innerHTML = 0;
   boxScoreDOM.style.visibility = "hidden";
   detalScoreDOM.style.visibility = "hidden";
@@ -537,66 +629,109 @@ window.addEventListener("keydown", (event) => {
 });
 
 function move(direction) {
-  const styleVisibilityboxScoreDOM = window.getComputedStyle(boxScoreDOM).visibility
-  if(styleVisibilityboxScoreDOM === "hidden"){
-    const finalPositions = moves.reduce(
-      (position, move) => {
-        if (move === "forward")
-          return { lane: position.lane + 1, column: position.column };
-        if (move === "backward")
-          return { lane: position.lane - 1, column: position.column };
-        if (move === "left")
-          return { lane: position.lane, column: position.column - 1 };
-        if (move === "right")
-          return { lane: position.lane, column: position.column + 1 };
-      },
-      { lane: currentLane, column: currentColumn }
-    );
+  const styleVisibilityboxScoreDOM = window.getComputedStyle(boxScoreDOM).visibility;
   
-    if (direction === "forward") {
-      if (
-        lanes[finalPositions.lane + 1].type === "forest" &&
-        lanes[finalPositions.lane + 1].occupiedPositions.has(
-          finalPositions.column
-        )
-      )
-        return;
-      if (!stepStartTimestamp) startMoving = true;
-      addLane();
-    } else if (direction === "backward") {
-      if (finalPositions.lane === 0) return;
-      if (
-        lanes[finalPositions.lane - 1].type === "forest" &&
-        lanes[finalPositions.lane - 1].occupiedPositions.has(
-          finalPositions.column
-        )
-      )
-        return;
-      if (!stepStartTimestamp) startMoving = true;
-    } else if (direction === "left") {
-      if (finalPositions.column === 0) return;
-      if (
-        lanes[finalPositions.lane].type === "forest" &&
-        lanes[finalPositions.lane].occupiedPositions.has(
-          finalPositions.column - 1
-        )
-      )
-        return;
-      if (!stepStartTimestamp) startMoving = true;
-    } else if (direction === "right") {
-      if (finalPositions.column === columns - 1) return;
-      if (
-        lanes[finalPositions.lane].type === "forest" &&
-        lanes[finalPositions.lane].occupiedPositions.has(
-          finalPositions.column + 1
-        )
-      )
-        return;
-      if (!stepStartTimestamp) startMoving = true;
+  if (styleVisibilityboxScoreDOM === "hidden") {
+    const finalPositions = calculateFinalPositions();
+
+    if (canMove(direction, finalPositions)) {
+      handleMovement(direction, finalPositions);
+      moves.push(direction);
     }
-    moves.push(direction);
   }
 }
+
+// Function to calculate the final position based on moves array
+function calculateFinalPositions() {
+  return moves.reduce(
+    (position, move) => {
+      switch (move) {
+        case "forward":
+          return { lane: position.lane + 1, column: position.column };
+        case "backward":
+          return { lane: position.lane - 1, column: position.column };
+        case "left":
+          return { lane: position.lane, column: position.column - 1 };
+        case "right":
+          return { lane: position.lane, column: position.column + 1 };
+        default:
+          return position;
+      }
+    },
+    { lane: currentLane, column: currentColumn }
+  );
+}
+
+// Function to check if the move is valid (no collision and within bounds)
+function canMove(direction, finalPositions) {
+  switch (direction) {
+    case "forward":
+      return canMoveForward(finalPositions);
+    case "backward":
+      return canMoveBackward(finalPositions);
+    case "left":
+      return canMoveLeft(finalPositions);
+    case "right":
+      return canMoveRight(finalPositions);
+    default:
+      return false;
+  }
+}
+
+// Check if moving forward is valid
+function canMoveForward(finalPositions) {
+  if (lanes[finalPositions.lane + 1]?.type === "forest" && lanes[finalPositions.lane + 1].occupiedPositions.has(finalPositions.column)) {
+    return false;
+  }
+  if (!stepStartTimestamp) startMoving = true;
+  return true;
+}
+
+// Check if moving backward is valid
+function canMoveBackward(finalPositions) {
+  if (finalPositions.lane === 0) return false;
+  if (lanes[finalPositions.lane - 1]?.type === "forest" && lanes[finalPositions.lane - 1].occupiedPositions.has(finalPositions.column)) {
+    return false;
+  }
+  if (!stepStartTimestamp) startMoving = true;
+  return true;
+}
+
+// Check if moving left is valid
+function canMoveLeft(finalPositions) {
+  if (finalPositions.column === 0) return false;
+  if (lanes[finalPositions.lane]?.type === "forest" && lanes[finalPositions.lane].occupiedPositions.has(finalPositions.column - 1)) {
+    return false;
+  }
+  if (!stepStartTimestamp) startMoving = true;
+  return true;
+}
+
+// Check if moving right is valid
+function canMoveRight(finalPositions) {
+  if (finalPositions.column === columns - 1) return false;
+  if (lanes[finalPositions.lane]?.type === "forest" && lanes[finalPositions.lane].occupiedPositions.has(finalPositions.column + 1)) {
+    return false;
+  }
+  if (!stepStartTimestamp) startMoving = true;
+  return true;
+}
+
+// Function to handle the movement action based on direction
+function handleMovement(direction, finalPositions) {
+  switch (direction) {
+    case "forward":
+      addLane();
+      break;
+    case "backward":
+      break; // No additional actions needed for backward
+    case "left":
+      break; // No additional actions needed for left
+    case "right":
+      break; // No additional actions needed for right
+  }
+}
+
 
 function animate(timestamp) {
   requestAnimationFrame(animate);
@@ -605,138 +740,184 @@ function animate(timestamp) {
   const delta = timestamp - previousTimestamp;
   previousTimestamp = timestamp;
 
-  // Animate cars and trucks moving on the lane
-  lanes.forEach((lane) => {
-    if (lane.type === "car" || lane.type === "truck") {
-      const aBitBeforeTheBeginingOfLane =
-        (-boardWidth * zoom) / 2 - positionWidth * 2 * zoom;
-      const aBitAfterTheEndOFLane =
-        (boardWidth * zoom) / 2 + positionWidth * 2 * zoom;
-      lane.vechicles.forEach((vechicle) => {
-        if (lane.direction) {
-          vechicle.position.x =
-            vechicle.position.x < aBitBeforeTheBeginingOfLane
-              ? aBitAfterTheEndOFLane
-              : (vechicle.position.x -= (lane.speed / 16) * delta);
-        } else {
-          vechicle.position.x =
-            vechicle.position.x > aBitAfterTheEndOFLane
-              ? aBitBeforeTheBeginingOfLane
-              : (vechicle.position.x += (lane.speed / 16) * delta);
-        }
-      });
-    }
-  });
+  // Handle vehicle animation (car and truck movements)
+  animateVehicles(delta);
 
+  // Handle chicken movement
   if (startMoving) {
     stepStartTimestamp = timestamp;
     startMoving = false;
   }
 
   if (stepStartTimestamp) {
-    const moveDeltaTime = timestamp - stepStartTimestamp;
-    const moveDeltaDistance =
-      Math.min(moveDeltaTime / stepTime, 1) * positionWidth * zoom;
-    const jumpDeltaDistance =
-      Math.sin(Math.min(moveDeltaTime / stepTime, 1) * Math.PI) * 8 * zoom;
-    switch (moves[0]) {
-      case "forward": {
-        const positionY =
-          currentLane * positionWidth * zoom + moveDeltaDistance;
-        camera.position.y = initialCameraPositionY + positionY;
-        dirLight.position.y = initialDirLightPositionY + positionY;
-        chicken.position.y = positionY; // initial chicken position is 0
-
-        chicken.position.z = jumpDeltaDistance;
-        break;
-      }
-      case "backward": {
-        positionY = currentLane * positionWidth * zoom - moveDeltaDistance;
-        camera.position.y = initialCameraPositionY + positionY;
-        dirLight.position.y = initialDirLightPositionY + positionY;
-        chicken.position.y = positionY;
-
-        chicken.position.z = jumpDeltaDistance;
-        break;
-      }
-      case "left": {
-        const positionX =
-          (currentColumn * positionWidth + positionWidth / 2) * zoom -
-          (boardWidth * zoom) / 2 -
-          moveDeltaDistance;
-        camera.position.x = initialCameraPositionX + positionX;
-        dirLight.position.x = initialDirLightPositionX + positionX;
-        chicken.position.x = positionX; // initial chicken position is 0
-        chicken.position.z = jumpDeltaDistance;
-        break;
-      }
-      case "right": {
-        const positionX =
-          (currentColumn * positionWidth + positionWidth / 2) * zoom -
-          (boardWidth * zoom) / 2 +
-          moveDeltaDistance;
-        camera.position.x = initialCameraPositionX + positionX;
-        dirLight.position.x = initialDirLightPositionX + positionX;
-        chicken.position.x = positionX;
-
-        chicken.position.z = jumpDeltaDistance;
-        break;
-      }
-    }
-    // Once a step has ended
-    if (moveDeltaTime > stepTime) {
-      switch (moves[0]) {
-        case "forward": {
-          currentLane++;
-          counterDOM.innerHTML = currentLane;
-          break;
-        }
-        case "backward": {
-          currentLane--;
-          counterDOM.innerHTML = currentLane;
-          break;
-        }
-        case "left": {
-          currentColumn--;
-          break;
-        }
-        case "right": {
-          currentColumn++;
-          break;
-        }
-      }
-      moves.shift();
-      // If more steps are to be taken then restart counter otherwise stop stepping
-      stepStartTimestamp = moves.length === 0 ? null : timestamp;
-    }
+    handleChickenMovement(timestamp, delta);
   }
 
-  // Hit test
-  if (
-    lanes[currentLane].type === "car" ||
-    lanes[currentLane].type === "truck"
-  ) {
-    const chickenMinX = chicken.position.x - (chickenSize * zoom) / 2;
-    const chickenMaxX = chicken.position.x + (chickenSize * zoom) / 2;
-    const vechicleLength = { car: 60, truck: 105 }[lanes[currentLane].type];
-    lanes[currentLane].vechicles.forEach((vechicle) => {
-      const carMinX = vechicle.position.x - (vechicleLength * zoom) / 2;
-      const carMaxX = vechicle.position.x + (vechicleLength * zoom) / 2;
-      if (chickenMaxX > carMinX && chickenMinX < carMaxX) {
-        const localStorageScore = localStorage.getItem('crossy-road-best-score') || 0;
+  // Collision detection
+  checkCollisions();
 
-        if(currentLane > localStorageScore){
-            localStorage.setItem('crossy-road-best-score', currentLane)
+  // Render the scene
+  renderer.render(scene, camera);
+}
+
+// Separate function to handle vehicle animation
+function animateVehicles(delta) {
+  lanes.forEach((lane) => {
+    if (lane.type === "car" || lane.type === "truck") {
+      const laneBounds = getLaneBounds();
+      lane.vechicles.forEach((vechicle) => {
+        if (lane.direction) {
+          moveVehicleForward(vechicle, lane, delta, laneBounds);
+        } else {
+          moveVehicleBackward(vechicle, lane, delta, laneBounds);
         }
-        bestScoreDOM.innerHTML = currentLane > localStorageScore ? currentLane : localStorageScore;
-        resultScoreDOM.innerHTML = currentLane;
-        boxScoreDOM.style.visibility = "visible";
-        detalScoreDOM.style.visibility = "visible";
-        // endDOM.style.visibility = "visible";
+      });
+    }
+  });
+}
+
+// Function to get lane bounds
+function getLaneBounds() {
+  return {
+    beforeStart: (-boardWidth * zoom) / 2 - positionWidth * 2 * zoom,
+    afterEnd: (boardWidth * zoom) / 2 + positionWidth * 2 * zoom
+  };
+}
+
+// Function to move vehicle forward
+function moveVehicleForward(vechicle, lane, delta, laneBounds) {
+  if (vechicle.position.x < laneBounds.beforeStart) {
+    vechicle.position.x = laneBounds.afterEnd;
+  } else {
+    vechicle.position.x -= (lane.speed / 16) * delta;
+  }
+}
+
+// Function to move vehicle backward
+function moveVehicleBackward(vechicle, lane, delta, laneBounds) {
+  if (vechicle.position.x > laneBounds.afterEnd) {
+    vechicle.position.x = laneBounds.beforeStart;
+  } else {
+    vechicle.position.x += (lane.speed / 16) * delta;
+  }
+}
+
+// Function to handle chicken's movement
+function handleChickenMovement(timestamp, delta) {
+  const moveDeltaTime = timestamp - stepStartTimestamp;
+  const moveDeltaDistance = Math.min(moveDeltaTime / stepTime, 1) * positionWidth * zoom;
+  const jumpDeltaDistance = Math.sin(Math.min(moveDeltaTime / stepTime, 1) * Math.PI) * 8 * zoom;
+
+  const movementData = getMovementData(moveDeltaDistance, jumpDeltaDistance);
+  applyChickenMovement(movementData);
+  
+  // Once a step has ended
+  if (moveDeltaTime > stepTime) {
+    updatePositionAfterMove();
+    stepStartTimestamp = moves.length === 0 ? null : timestamp;
+  }
+}
+
+// Function to calculate movement data
+function getMovementData(moveDeltaDistance, jumpDeltaDistance) {
+  let positionX = chicken.position.x;
+  let positionY = chicken.position.y;
+
+  switch (moves[0]) {
+    case "forward":
+      positionY = currentLane * positionWidth * zoom + moveDeltaDistance;
+      break;
+    case "backward":
+      positionY = currentLane * positionWidth * zoom - moveDeltaDistance;
+      break;
+    case "left":
+      positionX = (currentColumn * positionWidth + positionWidth / 2) * zoom - (boardWidth * zoom) / 2 - moveDeltaDistance;
+      break;
+    case "right":
+      positionX = (currentColumn * positionWidth + positionWidth / 2) * zoom - (boardWidth * zoom) / 2 + moveDeltaDistance;
+      break;
+  }
+
+  return { positionX, positionY, jumpDeltaDistance };
+}
+
+// Function to apply the movement to chicken
+function applyChickenMovement({ positionX, positionY, jumpDeltaDistance }) {
+  camera.position.y = initialCameraPositionY + positionY;
+  dirLight.position.y = initialDirLightPositionY + positionY;
+  chicken.position.set(positionX, positionY, jumpDeltaDistance);
+
+  camera.position.x = initialCameraPositionX + positionX;
+  dirLight.position.x = initialDirLightPositionX + positionX;
+}
+
+// Function to update chicken's position after move
+function updatePositionAfterMove() {
+  switch (moves[0]) {
+    case "forward":
+      currentLane++;
+      break;
+    case "backward":
+      currentLane--;
+      break;
+    case "left":
+      currentColumn--;
+      break;
+    case "right":
+      currentColumn++;
+      break;
+  }
+  counterDOM.innerHTML = currentLane;
+  moves.shift();
+}
+
+// Collision detection logic
+function checkCollisions() {
+  if (lanes[currentLane].type === "car" || lanes[currentLane].type === "truck") {
+    const chickenBounds = getChickenBounds();
+    lanes[currentLane].vechicles.forEach((vechicle) => {
+      const vehicleBounds = getVehicleBounds(vechicle, lanes[currentLane].type);
+      if (isColliding(chickenBounds, vehicleBounds)) {
+        handleCollision();
       }
     });
   }
-  renderer.render(scene, camera);
 }
+
+// Function to get the bounds of the chicken
+function getChickenBounds() {
+  return {
+    minX: chicken.position.x - (chickenSize * zoom) / 2,
+    maxX: chicken.position.x + (chickenSize * zoom) / 2
+  };
+}
+
+// Function to get the bounds of a vehicle
+function getVehicleBounds(vechicle, vehicleType) {
+  const vehicleLength = { car: 60, truck: 105 }[vehicleType];
+  return {
+    minX: vechicle.position.x - (vehicleLength * zoom) / 2,
+    maxX: vechicle.position.x + (vehicleLength * zoom) / 2
+  };
+}
+
+// Function to check if there is a collision
+function isColliding(chickenBounds, vehicleBounds) {
+  return chickenBounds.maxX > vehicleBounds.minX && chickenBounds.minX < vehicleBounds.maxX;
+}
+
+// Handle the collision (e.g., game over or score update)
+function handleCollision() {
+  const localStorageScore = localStorage.getItem('crossy-road-best-score') || 0;
+  if (currentLane > localStorageScore) {
+    localStorage.setItem('crossy-road-best-score', currentLane);
+  }
+
+  bestScoreDOM.innerHTML = Math.max(currentLane, localStorageScore);
+  resultScoreDOM.innerHTML = currentLane;
+  boxScoreDOM.style.visibility = "visible";
+  detalScoreDOM.style.visibility = "visible";
+}
+
 
 requestAnimationFrame(animate);

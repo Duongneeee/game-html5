@@ -89,84 +89,113 @@ Array.prototype.last = function () {
   // Initialize layout
   resetGame();
   
-  // Resets game variables and layouts but does not start the game (game starts on keypress)
   function resetGame() {
-    // Reset game progress
-    gameStatus = "waiting";
-    previousTimestamp = undefined;
-    worldOffset = 0;
-    score = 0;
-  
-    introductionDOM.style.opacity = 0;
-    perfectDOM.style.opacity = 0;
-    // restartButton.style.display = "none";
-    scoreDOM.innerText = score;
-  
-    // The first platform is always the same
-    // x + w has to match paddingX
-    platforms = [{ x: 50, w: 50 }];
-    generatePlatform();
-    generatePlatform();
-    generatePlatform();
-    generatePlatform();
-  
-    sticks = [{ x: platforms[0].x + platforms[0].w, length: 0, rotation: 0 }];
-  
-    vegetation = [];
-    generateTree();
-    generateTree();
-    generateTree();
-    generateTree();
-    generateTree();
-    generateTree();
-    generateTree();
-    generateTree();
-    generateTree();
-    generateTree();
-  
-    playerPosX = platforms[0].x + platforms[0].w - playerEdgePadding;
-    playerPosY = 0;
-  
+    // Reset trạng thái game
+    initializeGameState();
+    resetDOMElements();
+    resetPlatforms();
+    resetSticks();
+    resetVegetation();
+    resetPlayerPosition();
+
+    // Vẽ lại màn hình
     draw();
+}
+
+  // Hàm con: Khởi tạo trạng thái game
+  function initializeGameState() {
+      gameStatus = "waiting";
+      previousTimestamp = undefined;
+      worldOffset = 0;
+      score = 0;
   }
-  
+
+  // Hàm con: Cập nhật giao diện DOM
+  function resetDOMElements() {
+      introductionDOM.style.opacity = 0;
+      perfectDOM.style.opacity = 0;
+      scoreDOM.innerText = score;
+  }
+
+  // Hàm con: Tạo lại nền tảng
+  function resetPlatforms() {
+      platforms = [{ x: 50, w: 50 }]; // Nền tảng đầu tiên cố định
+      for (let i = 0; i < 4; i++) {
+          generatePlatform(); // Tạo 4 nền tảng bổ sung
+      }
+  }
+
+  // Hàm con: Tạo lại gậy
+  function resetSticks() {
+      sticks = [{ x: platforms[0].x + platforms[0].w, length: 0, rotation: 0 }];
+  }
+
+  // Hàm con: Tạo lại cây và thực vật
+  function resetVegetation() {
+      vegetation = [];
+      for (let i = 0; i < 10; i++) {
+          generateTree(); // Tạo 10 cây
+      }
+  }
+
+  // Hàm con: Đặt lại vị trí người chơi
+  function resetPlayerPosition() {
+      playerPosX = platforms[0].x + platforms[0].w - playerEdgePadding;
+      playerPosY = 0;
+  }
+
+    
   function generateTree() {
-    const minimumGap = 30;
-    const maximumGap = 150;
-  
-    // X coordinate of the right edge of the furthest tree
-    const lastTree = vegetation[vegetation.length - 1];
-    let furthestX = lastTree ? lastTree.x : 0;
-  
-    const x =
-      furthestX +
-      minimumGap +
-      Math.floor(Math.random() * (maximumGap - minimumGap));
-  
-    const treeColors = ["#6D8821", "#8FAC34", "#98B333"];
-    const color = treeColors[Math.floor(Math.random() * 3)];
-  
+    // Cài đặt các tham số khoảng cách và màu sắc
+    const GAP_RANGE = { min: 30, max: 150 };
+    const TREE_COLORS = ["#6D8821", "#8FAC34", "#98B333"];
+
+    // Lấy tọa độ X của cây xa nhất
+    const furthestX = vegetation.length > 0 
+        ? vegetation[vegetation.length - 1].x 
+        : 0;
+
+    // Tính toán vị trí mới cho cây
+    const x = furthestX + getRandomInRange(GAP_RANGE.min, GAP_RANGE.max);
+
+    // Lựa chọn màu ngẫu nhiên cho cây
+    const color = getRandomElement(TREE_COLORS);
+
+    // Thêm cây mới vào mảng vegetation
     vegetation.push({ x, color });
+  }
+
+  // Hàm phụ: Tạo giá trị ngẫu nhiên trong khoảng [min, max]
+  function getRandomInRange(min, max) {
+    return min + Math.floor(Math.random() * (max - min));
+  }
+
+  // Hàm phụ: Lấy phần tử ngẫu nhiên từ mảng
+  function getRandomElement(array) {
+    return array[Math.floor(Math.random() * array.length)];
   }
   
   function generatePlatform() {
-    const minimumGap = 40;
-    const maximumGap = 200;
-    const minimumWidth = 20;
-    const maximumWidth = 100;
-  
-    // X coordinate of the right edge of the furthest platform
-    const lastPlatform = platforms[platforms.length - 1];
-    let furthestX = lastPlatform.x + lastPlatform.w;
-  
-    const x =
-      furthestX +
-      minimumGap +
-      Math.floor(Math.random() * (maximumGap - minimumGap));
-    const w =
-      minimumWidth + Math.floor(Math.random() * (maximumWidth - minimumWidth));
-  
+    // Cài đặt các tham số khoảng cách và kích thước
+    const GAP_RANGE = { min: 40, max: 200 };
+    const WIDTH_RANGE = { min: 20, max: 100 };
+
+    // Lấy tọa độ X của nền tảng xa nhất
+    const furthestX = platforms.length > 0 
+        ? platforms[platforms.length - 1].x + platforms[platforms.length - 1].w 
+        : 0;
+
+    // Tính toán vị trí và chiều rộng ngẫu nhiên
+    const x = furthestX + getRandomInRange(GAP_RANGE.min, GAP_RANGE.max);
+    const w = getRandomInRange(WIDTH_RANGE.min, WIDTH_RANGE.max);
+
+    // Thêm nền tảng mới vào mảng platforms
     platforms.push({ x, w });
+}
+
+  // Hàm phụ: Tạo giá trị ngẫu nhiên trong khoảng [min, max]
+  function getRandomInRange(min, max) {
+      return min + Math.floor(Math.random() * (max - min));
   }
   
   resetGame();
@@ -208,156 +237,214 @@ Array.prototype.last = function () {
   // The main game loop
   function animate(timestamp) {
     if (!previousTimestamp) {
-      previousTimestamp = timestamp;
-      window.requestAnimationFrame(animate);
-      return;
+        previousTimestamp = timestamp;
+        window.requestAnimationFrame(animate);
+        return;
     }
-  
-    switch (gameStatus) {
-      case "waiting":
-        return; // Stop the loop
-      case "stretching": {
-        sticks.last().length += (timestamp - previousTimestamp) / stretchingSpeed;
-        break;
-      }
-      case "turning": {
-        sticks.last().rotation += (timestamp - previousTimestamp) / turningSpeed;
-  
-        if (sticks.last().rotation > 90) {
-          sticks.last().rotation = 90;
-  
-          const [nextPlatform, perfectHit] = thePlatformTheStickHits();
-          if (nextPlatform) {
-            // Increase score
-            score += perfectHit ? 2 : 1;
-            scoreDOM.innerText = score;
-  
-            if (perfectHit) {
-              perfectDOM.style.opacity = 1;
-              setTimeout(() => (perfectDOM.style.opacity = 0), 1000);
-            }
-  
-            generatePlatform();
-            generateTree();
-            generateTree();
-          }
-  
-          gameStatus = "walking";
-        }
-        break;
-      }
-      case "walking": {
-        playerPosX += (timestamp - previousTimestamp) / walkingSpeed;
-  
-        const [nextPlatform] = thePlatformTheStickHits();
-        if (nextPlatform) {
-          // If hero will reach another platform then limit it's position at it's edge
-          const maxHeroX = nextPlatform.x + nextPlatform.w - playerEdgePadding;
-          if (playerPosX > maxHeroX) {
-            playerPosX = maxHeroX;
-            gameStatus = "transitioning";
-          }
-        } else {
-          // If hero won't reach another platform then limit it's position at the end of the pole
-          const maxHeroX = sticks.last().x + sticks.last().length + playerWidth;
-          if (playerPosX > maxHeroX) {
-            playerPosX = maxHeroX;
-            gameStatus = "falling";
-          }
-        }
-        break;
-      }
-      case "transitioning": {
-        worldOffset += (timestamp - previousTimestamp) / transitioningSpeed;
-  
-        const [nextPlatform] = thePlatformTheStickHits();
-        if (worldOffset > nextPlatform.x + nextPlatform.w - paddingX) {
-          // Add the next step
-          sticks.push({
-            x: nextPlatform.x + nextPlatform.w,
-            length: 0,
-            rotation: 0
-          });
-          gameStatus = "waiting";
-        }
-        break;
-      }
-      case "falling": {
-        if (sticks.last().rotation < 180)
-          sticks.last().rotation += (timestamp - previousTimestamp) / turningSpeed;
-  
-        playerPosY += (timestamp - previousTimestamp) / fallingSpeed;
-        const maxHeroY =
-          platformHeight + 100 + (window.innerHeight - canvasHeight) / 2;
-        if (playerPosY > maxHeroY) {
-          startGameDOM.style.display = "Block";
-          detalScoreDOM.style.display = "Block";
-          document.body.style.cursor = "default";
-          resultScoreDOM.innerText = score;
-          const localStorageScore = localStorage.getItem('stick-hero-best-score') || 0;
 
-          if(score > localStorageScore){
-              localStorage.setItem('stick-hero-best-score', score)
-          }
-          bestScoreDOM.innerHTML = score > localStorageScore ? score : localStorageScore;
-          // restartButton.style.display = "block";
-          return;
-        }
-        break;
-      }
-      default:
-        throw Error("Wrong gameStatus");
+    switch (gameStatus) {
+        case "waiting":
+            handleWaitingState();
+            return; // Stop the loop
+
+        case "stretching":
+            handleStretchingState(timestamp);
+            break;
+
+        case "turning":
+            handleTurningState(timestamp);
+            break;
+
+        case "walking":
+            handleWalkingState(timestamp);
+            break;
+
+        case "transitioning":
+            handleTransitioningState(timestamp);
+            break;
+
+        case "falling":
+            handleFallingState(timestamp);
+            break;
+
+        default:
+            throw Error("Invalid gameStatus");
     }
-  
+
     draw();
     window.requestAnimationFrame(animate);
-  
     previousTimestamp = timestamp;
+}
+
+  // Hàm phụ xử lý trạng thái "waiting"
+  function handleWaitingState() {
+      // Không cần làm gì vì game đang chờ
+  }
+
+  // Hàm phụ xử lý trạng thái "stretching"
+  function handleStretchingState(timestamp) {
+      sticks.last().length += (timestamp - previousTimestamp) / stretchingSpeed;
+  }
+
+  // Hàm phụ xử lý trạng thái "turning"
+  function handleTurningState(timestamp) {
+      sticks.last().rotation += (timestamp - previousTimestamp) / turningSpeed;
+
+      if (sticks.last().rotation > 90) {
+          sticks.last().rotation = 90;
+
+          const [nextPlatform, perfectHit] = thePlatformTheStickHits();
+          if (nextPlatform) {
+              updateScore(perfectHit);
+              generatePlatformAndTrees();
+          }
+
+          gameStatus = "walking";
+      }
+  }
+
+  // Hàm phụ xử lý trạng thái "walking"
+  function handleWalkingState(timestamp) {
+      playerPosX += (timestamp - previousTimestamp) / walkingSpeed;
+
+      const [nextPlatform] = thePlatformTheStickHits();
+      if (nextPlatform) {
+          const maxHeroX = nextPlatform.x + nextPlatform.w - playerEdgePadding;
+          if (playerPosX > maxHeroX) {
+              playerPosX = maxHeroX;
+              gameStatus = "transitioning";
+          }
+      } else {
+          const maxHeroX = sticks.last().x + sticks.last().length + playerWidth;
+          if (playerPosX > maxHeroX) {
+              playerPosX = maxHeroX;
+              gameStatus = "falling";
+          }
+      }
+  }
+
+  // Hàm phụ xử lý trạng thái "transitioning"
+  function handleTransitioningState(timestamp) {
+      worldOffset += (timestamp - previousTimestamp) / transitioningSpeed;
+
+      const [nextPlatform] = thePlatformTheStickHits();
+      if (worldOffset > nextPlatform.x + nextPlatform.w - paddingX) {
+          sticks.push({
+              x: nextPlatform.x + nextPlatform.w,
+              length: 0,
+              rotation: 0
+          });
+          gameStatus = "waiting";
+      }
+  }
+
+  // Hàm phụ xử lý trạng thái "falling"
+  function handleFallingState(timestamp) {
+      if (sticks.last().rotation < 180) {
+          sticks.last().rotation += (timestamp - previousTimestamp) / turningSpeed;
+      }
+
+      playerPosY += (timestamp - previousTimestamp) / fallingSpeed;
+      const maxHeroY =
+          platformHeight + 100 + (window.innerHeight - canvasHeight) / 2;
+
+      if (playerPosY > maxHeroY) {
+          showEndGameUI();
+          return;
+      }
+  }
+
+  // Hàm phụ cập nhật điểm số
+  function updateScore(perfectHit) {
+      score += perfectHit ? 2 : 1;
+      scoreDOM.innerText = score;
+
+      if (perfectHit) {
+          perfectDOM.style.opacity = 1;
+          setTimeout(() => (perfectDOM.style.opacity = 0), 1000);
+      }
+  }
+
+  // Hàm phụ tạo nền tảng và cây mới
+  function generatePlatformAndTrees() {
+      generatePlatform();
+      generateTree();
+      generateTree();
+  }
+
+  // Hàm phụ hiển thị giao diện kết thúc game
+  function showEndGameUI() {
+      startGameDOM.style.display = "block";
+      detalScoreDOM.style.display = "block";
+      document.body.style.cursor = "default";
+      resultScoreDOM.innerText = score;
+
+      const localStorageScore = localStorage.getItem("stick-hero-best-score") || 0;
+      if (score > localStorageScore) {
+          localStorage.setItem("stick-hero-best-score", score);
+      }
+      bestScoreDOM.innerHTML = score > localStorageScore ? score : localStorageScore;
   }
   
   // Returns the platform the stick hit (if it didn't hit any stick then return undefined)
   function thePlatformTheStickHits() {
-    if (sticks.last().rotation != 90)
-      throw Error(`Stick is ${sticks.last().rotation}°`);
+    if (sticks.last().rotation !== 90) {
+        throw new Error(`Stick is ${sticks.last().rotation}°`);
+    }
+
     const stickFarX = sticks.last().x + sticks.last().length;
-  
-    const platformTheStickHits = platforms.find(
-      (platform) => platform.x < stickFarX && stickFarX < platform.x + platform.w
-    );
-  
-    // If the stick hits the perfect area
-    if (
-      platformTheStickHits &&
-      platformTheStickHits.x + platformTheStickHits.w / 2 - perfectAreaSize / 2 <
-        stickFarX &&
-      stickFarX <
-        platformTheStickHits.x + platformTheStickHits.w / 2 + perfectAreaSize / 2
-    )
-      return [platformTheStickHits, true];
-  
-    return [platformTheStickHits, false];
+    const platformTheStickHits = findPlatformHitByStick(stickFarX);
+
+    if (!platformTheStickHits) {
+        return [null, false];
+    }
+
+    const perfectHit = isPerfectHit(platformTheStickHits, stickFarX);
+    return [platformTheStickHits, perfectHit];
+}
+
+  // Hàm phụ tìm nền tảng mà cây gậy chạm vào
+  function findPlatformHitByStick(stickFarX) {
+      return platforms.find(platform => 
+          platform.x < stickFarX && stickFarX < platform.x + platform.w
+      );
+  }
+
+  // Hàm phụ kiểm tra xem gậy có chạm đúng vùng "perfect" hay không
+  function isPerfectHit(platform, stickFarX) {
+      const platformCenter = platform.x + platform.w / 2;
+      const perfectAreaStart = platformCenter - perfectAreaSize / 2;
+      const perfectAreaEnd = platformCenter + perfectAreaSize / 2;
+
+      return stickFarX > perfectAreaStart && stickFarX < perfectAreaEnd;
   }
   
   function draw() {
     ctx.save();
     ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-  
+
     drawBackground();
+    centerCanvas();
+    drawScene();
   
-    // Center main canvas area to the middle of the screen
-    ctx.translate(
-      (window.innerWidth - canvasWidth) / 2 - worldOffset,
-      (window.innerHeight - canvasHeight) / 2
-    );
-  
-    // Draw scene
-    drawPlatforms();
-    drawHero();
-    drawSticks();
-  
-    // Restore transformation
     ctx.restore();
+}
+
+  // Hàm phụ căn giữa canvas trên màn hình
+  function centerCanvas() {
+      ctx.translate(
+          (window.innerWidth - canvasWidth) / 2 - worldOffset,
+          (window.innerHeight - canvasHeight) / 2
+      );
   }
+
+  // Hàm phụ vẽ toàn bộ cảnh
+  function drawScene() {
+      drawPlatforms();
+      drawHero();
+      drawSticks();
+  }
+
   
   // restartButton.addEventListener("click", function (event) {
   //   event.preventDefault();
@@ -367,76 +454,98 @@ Array.prototype.last = function () {
   
   function drawPlatforms() {
     platforms.forEach(({ x, w }) => {
-      // Draw platform
+        drawPlatform(x, w);
+        if (sticks.last().x < x) {
+            drawPerfectArea(x, w);
+        }
+    });
+}
+
+  // Hàm phụ vẽ nền tảng
+  function drawPlatform(x, w) {
       ctx.fillStyle = "black";
       ctx.fillRect(
-        x,
-        canvasHeight - platformHeight,
-        w,
-        platformHeight + (window.innerHeight - canvasHeight) / 2
+          x,
+          canvasHeight - platformHeight,
+          w,
+          platformHeight + (window.innerHeight - canvasHeight) / 2
       );
-  
-      // Draw perfect area only if hero did not yet reach the platform
-      if (sticks.last().x < x) {
-        ctx.fillStyle = "red";
-        ctx.fillRect(
+  }
+
+  // Hàm phụ vẽ khu vực perfect
+  function drawPerfectArea(x, w) {
+      ctx.fillStyle = "red";
+      ctx.fillRect(
           x + w / 2 - perfectAreaSize / 2,
           canvasHeight - platformHeight,
           perfectAreaSize,
           perfectAreaSize
-        );
-      }
-    });
+      );
   }
+
   
   function drawHero() {
     ctx.save();
     ctx.fillStyle = "black";
     ctx.translate(
-      playerPosX - playerWidth / 2,
-      playerPosY + canvasHeight - platformHeight - playerHeight / 2
+        playerPosX - playerWidth / 2,
+        playerPosY + canvasHeight - platformHeight - playerHeight / 2
     );
-  
-    // Body
-    drawRoundedRect(
-      -playerWidth / 2,
-      -playerHeight / 2,
-      playerWidth,
-      playerHeight - 4,
-      5
-    );
-  
-    // Legs
-    const legDistance = 5;
-    ctx.beginPath();
-    ctx.arc(legDistance, 11.5, 3, 0, Math.PI * 2, false);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(-legDistance, 11.5, 3, 0, Math.PI * 2, false);
-    ctx.fill();
-  
-    // Eye
-    ctx.beginPath();
-    ctx.fillStyle = "white";
-    ctx.arc(5, -7, 3, 0, Math.PI * 2, false);
-    ctx.fill();
-  
-    // Band
-    ctx.fillStyle = "red";
-    ctx.fillRect(-playerWidth / 2 - 1, -12, playerWidth + 2, 4.5);
-    ctx.beginPath();
-    ctx.moveTo(-9, -14.5);
-    ctx.lineTo(-17, -18.5);
-    ctx.lineTo(-14, -8.5);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(-10, -10.5);
-    ctx.lineTo(-15, -3.5);
-    ctx.lineTo(-5, -7);
-    ctx.fill();
-  
+
+    drawBody();
+    drawLegs();
+    drawEye();
+    drawBand();
+
     ctx.restore();
+}
+
+  // Hàm phụ vẽ cơ thể nhân vật
+  function drawBody() {
+      drawRoundedRect(
+          -playerWidth / 2,
+          -playerHeight / 2,
+          playerWidth,
+          playerHeight - 4,
+          5
+      );
   }
+
+  // Hàm phụ vẽ đôi chân
+  function drawLegs() {
+      const legDistance = 5;
+      ctx.beginPath();
+      ctx.arc(legDistance, 11.5, 3, 0, Math.PI * 2, false);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(-legDistance, 11.5, 3, 0, Math.PI * 2, false);
+      ctx.fill();
+  }
+
+  // Hàm phụ vẽ mắt
+  function drawEye() {
+      ctx.beginPath();
+      ctx.fillStyle = "white";
+      ctx.arc(5, -7, 3, 0, Math.PI * 2, false);
+      ctx.fill();
+  }
+
+  // Hàm phụ vẽ băng đầu
+  function drawBand() {
+      ctx.fillStyle = "red";
+      ctx.fillRect(-playerWidth / 2 - 1, -12, playerWidth + 2, 4.5);
+      ctx.beginPath();
+      ctx.moveTo(-9, -14.5);
+      ctx.lineTo(-17, -18.5);
+      ctx.lineTo(-14, -8.5);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(-10, -10.5);
+      ctx.lineTo(-15, -3.5);
+      ctx.lineTo(-5, -7);
+      ctx.fill();
+  }
+
   
   function drawRoundedRect(x, y, width, height, radius) {
     ctx.beginPath();
@@ -454,52 +563,81 @@ Array.prototype.last = function () {
   
   function drawSticks() {
     sticks.forEach((stick) => {
-      ctx.save();
-  
-      // Move the anchor point to the start of the stick and rotate
-      ctx.translate(stick.x, canvasHeight - platformHeight);
-      ctx.rotate((Math.PI / 180) * stick.rotation);
-  
-      // Draw stick
+        ctx.save();
+        
+        // Di chuyển điểm neo đến vị trí bắt đầu của cây gậy và xoay
+        ctx.translate(stick.x, canvasHeight - platformHeight);
+        ctx.rotate((Math.PI / 180) * stick.rotation);
+        
+        drawStick(stick);
+        
+        // Khôi phục lại các phép biến đổi
+        ctx.restore();
+    });
+  }
+
+  // Hàm phụ vẽ cây gậy
+  function drawStick(stick) {
       ctx.beginPath();
       ctx.lineWidth = 2;
       ctx.moveTo(0, 0);
       ctx.lineTo(0, -stick.length);
       ctx.stroke();
-  
-      // Restore transformations
-      ctx.restore();
-    });
   }
+
   
-  function drawBackground(isDrawHill) {
+  function drawBackground() {
     // Draw sky
-    var gradient = ctx.createLinearGradient(0, 0, 0, window.innerHeight);
-    // set màu nền
-    gradient.addColorStop(0, drawBackgroundColor1);
-    gradient.addColorStop(1, drawBackgroundColor2);
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+    drawSky();
   
     // Vẽ đồi
-    drawHill(hill1BaseHeight, hill1Amplitude, hill1Stretch, "#95C629");
-    drawHill(hill2BaseHeight, hill2Amplitude, hill2Stretch, "#659F1C");
+    drawHills();
   
     // Draw vegetation
-    vegetation.forEach((tree) => drawTree(tree.x, tree.color));
+    drawVegetation();
   }
+
+  // Hàm phụ vẽ bầu trời với gradient
+  function drawSky() {
+      var gradient = ctx.createLinearGradient(0, 0, 0, window.innerHeight);
+      // set màu nền
+      gradient.addColorStop(0, drawBackgroundColor1);
+      gradient.addColorStop(1, drawBackgroundColor2);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+  }
+
+  // Hàm phụ vẽ đồi
+  function drawHills() {
+      drawHill(hill1BaseHeight, hill1Amplitude, hill1Stretch, "#95C629");
+      drawHill(hill2BaseHeight, hill2Amplitude, hill2Stretch, "#659F1C");
+  }
+
+  // Hàm phụ vẽ thực vật (cây)
+  function drawVegetation() {
+      vegetation.forEach((tree) => drawTree(tree.x, tree.color));
+  }
+
   
   // A hill is a shape under a stretched out sinus wave
   function drawHill(baseHeight, amplitude, stretch, color) {
     ctx.beginPath();
     ctx.moveTo(0, window.innerHeight);
     ctx.lineTo(0, getHillY(0, baseHeight, amplitude, stretch));
-    for (let i = 0; i < window.innerWidth; i++) {
-      ctx.lineTo(i, getHillY(i, baseHeight, amplitude, stretch));
-    }
+
+    // Vẽ các điểm còn lại của đồi
+    drawHillPath(baseHeight, amplitude, stretch);
+
     ctx.lineTo(window.innerWidth, window.innerHeight);
     ctx.fillStyle = color;
     ctx.fill();
+}
+
+  // Hàm phụ vẽ đường đi của đồi
+  function drawHillPath(baseHeight, amplitude, stretch) {
+      for (let i = 0; i < window.innerWidth; i++) {
+          ctx.lineTo(i, getHillY(i, baseHeight, amplitude, stretch));
+      }
   }
   
   function drawTree(x, color) {
@@ -508,30 +646,41 @@ Array.prototype.last = function () {
       (-worldOffset * backgroundSpeedFactor + x) * hill1Stretch,
       getTreeY(x, hill1BaseHeight, hill1Amplitude)
     );
-  
-    const treeTrunkHeight = 5;
-    const treeTrunkWidth = 2;
-    const treeCrownHeight = 25;
-    const treeCrownWidth = 10;
-  
-    // Draw trunk
-    ctx.fillStyle = "#7D833C";
-    ctx.fillRect(
-      -treeTrunkWidth / 2,
-      -treeTrunkHeight,
-      treeTrunkWidth,
-      treeTrunkHeight
-    );
-  
-    // Draw crown
-    ctx.beginPath();
-    ctx.moveTo(-treeCrownWidth / 2, -treeTrunkHeight);
-    ctx.lineTo(0, -(treeTrunkHeight + treeCrownHeight));
-    ctx.lineTo(treeCrownWidth / 2, -treeTrunkHeight);
-    ctx.fillStyle = color;
-    ctx.fill();
-  
+
+    // Vẽ thân cây
+    drawTreeTrunk();
+
+    // Vẽ tán cây
+    drawTreeCrown(color);
+
     ctx.restore();
+  }
+
+  // Hàm vẽ thân cây
+  function drawTreeTrunk() {
+      const treeTrunkHeight = 5;
+      const treeTrunkWidth = 2;
+
+      ctx.fillStyle = "#7D833C";
+      ctx.fillRect(
+        -treeTrunkWidth / 2,
+        -treeTrunkHeight,
+        treeTrunkWidth,
+        treeTrunkHeight
+      );
+  }
+
+  // Hàm vẽ tán cây
+  function drawTreeCrown(color) {
+      const treeCrownHeight = 25;
+      const treeCrownWidth = 10;
+
+      ctx.beginPath();
+      ctx.moveTo(-treeCrownWidth / 2, -5); // Offset the trunk height for crown positioning
+      ctx.lineTo(0, -(5 + treeCrownHeight));
+      ctx.lineTo(treeCrownWidth / 2, -5);
+      ctx.fillStyle = color;
+      ctx.fill();
   }
   
   function getHillY(windowX, baseHeight, amplitude, stretch) {
@@ -548,32 +697,53 @@ Array.prototype.last = function () {
     return Math.sinus(x) * amplitude + sineBaseY;
   }
 
-  startGameDOM.addEventListener("click", () => {
+  // Hàm khởi tạo các sự kiện
+  function initGameEvents() {
+    startGameDOM.addEventListener("click", handleStartGameClick);
+  }
+
+  // Hàm xử lý sự kiện click vào nút bắt đầu trò chơi
+  function handleStartGameClick() {
     backgroundColorPaletteDOM.style.display = "none";
     startGameDOM.style.display = "none";
     detalScoreDOM.style.display = "none";
     document.body.style.cursor = "pointer";
-    if(gameStatus === "falling") resetGame();
+
+    if (gameStatus === "falling") {
+        resetGame();
+    }
+
     introductionDOM.style.opacity = 1;
-    window.addEventListener("mousedown", function (event) {
-      if (gameStatus == "waiting") {
+    
+    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("resize", handleWindowResize);
+  }
+
+  // Hàm xử lý sự kiện mousedown (nhấn chuột)
+  function handleMouseDown(event) {
+    if (gameStatus == "waiting") {
         previousTimestamp = undefined;
         introductionDOM.style.opacity = 0;
         gameStatus = "stretching";
         window.requestAnimationFrame(animate);
-      }
-    });
-    
-    window.addEventListener("mouseup", function (event) {
-      if (gameStatus == "stretching") {
+    }
+  }
+
+  // Hàm xử lý sự kiện mouseup (thả chuột)
+  function handleMouseUp(event) {
+    if (gameStatus == "stretching") {
         gameStatus = "turning";
-      }
-    });
-    
-    window.addEventListener("resize", function (event) {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      draw();
-    });
-  });
+    }
+  }
+
+  // Hàm xử lý sự kiện resize (thay đổi kích thước cửa sổ)
+  function handleWindowResize(event) {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    draw();
+  }
+
+  // Gọi hàm khởi tạo các sự kiện khi trang được tải
+  initGameEvents();
   
