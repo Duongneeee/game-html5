@@ -7,14 +7,24 @@
     <link rel="stylesheet" href="style.css" />
     <script src="./main.js" defer></script>
   </head>
-  <body>
-    <div class="container">
+  <body class="first-body">
+    <div class="screen-1">
+      <div class="email">
+          <label for="email">User name</label>
+          <div class="sec-2">
+          <!-- <ion-icon name="mail-outline"></ion-icon> -->
+          <input type="text" name="text" id="username" placeholder="Enter your username" required/>
+          </div>
+      </div>
+      <button class="login">Play now</button>
+    </div>
+    <div class="container" id="main-content">
       <div id="score"></div>
       <canvas id="game" width="375" height="375"></canvas>
       <div id="introduction">Hold down the mouse to stretch out a stick</div>
       <div id="perfect">DOUBLE SCORE</div>
       <!-- <button id="restart">RESTART</button> -->
-      <div id="box-score">
+      <div id="box-score" class="class-box-score">
         <div id="detal-score">
           <h3 class="over-game nosifer-regular">Over game</h3>
           <div class="general-score d-flex-block">

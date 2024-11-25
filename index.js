@@ -34,19 +34,19 @@ function Encryption(data) {
 const filesEncryption = [
     {
         input: 'D:/code/game-html5/crossy-road-game/script.js',
-        output: 'D:/code/game-html5/crossy-road-game/script_encryption.js'
+        output: 'D:/code/game-html5/crossy-road-game/script.min.js'
     },
     {
         input: 'D:/code/game-html5/flappy-bird/main.js',
-        output: 'D:/code/game-html5/flappy-bird/main_encryption.js'
+        output: 'D:/code/game-html5/flappy-bird/main.min.js'
     },
     {
         input: 'D:/code/game-html5/stick-hero/main.js',
-        output: 'D:/code/game-html5/stick-hero/main_encryption.js'
+        output: 'D:/code/game-html5/stick-hero/main.min.js'
     },
     {
         input: 'D:/code/game-html5/tower-blocks/script.js',
-        output: 'D:/code/game-html5/tower-blocks/script_encryption.js'
+        output: 'D:/code/game-html5/tower-blocks/script.min.js'
     }
 ];
 

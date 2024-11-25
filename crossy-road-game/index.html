@@ -6,16 +6,21 @@
     <meta name="viewport" content="width=device-width" />
     <link rel="stylesheet" href="style.css" />
   </head>
-  <body>
-    <div id="box-username">
-      <label>Enter Username:</label>
-      <input type="text" id="username"/>
-      <button>OK</button>
+  <body class="first-body">
+    <div class="screen-1">
+      <div class="email">
+        <label for="email">User name</label>
+        <div class="sec-2">
+          <!-- <ion-icon name="mail-outline"></ion-icon> -->
+          <input type="text" name="text" id="username" placeholder="Enter your username" required/>
+        </div>
+      </div>
+      <button class="login">Play now</button>
     </div>
-    
-    <div id="main-content" style="display:none;">
+
+    <div id="main-content" style="display: none">
       <div id="counter">0</div>
-  
+
       <div id="controlls">
         <div>
           <button id="forward">
@@ -48,7 +53,7 @@
           </button>
         </div>
       </div>
-  
+
       <div id="box-score">
         <div id="detal-score">
           <h3 class="over-game">Over game</h3>
@@ -64,7 +69,7 @@
           </div>
           <div>
             <p>Color Grass</p>
-            <input type="color"/>
+            <input type="color" />
           </div>
           <div>
             <p>Color Chicken</p>
@@ -75,7 +80,7 @@
           <button id="start-game">Start game</button>
         </div>
       </div>
-  
+
       <div id="end">
         <button id="retry">Retry</button>
       </div>
