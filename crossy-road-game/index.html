@@ -12,7 +12,13 @@
         <label for="email">User name</label>
         <div class="sec-2">
           <!-- <ion-icon name="mail-outline"></ion-icon> -->
-          <input type="text" name="text" id="username" placeholder="Enter your username" required/>
+          <input
+            type="text"
+            name="text"
+            id="username"
+            placeholder="Enter your username"
+            required
+          />
         </div>
       </div>
       <button class="login">Play now</button>
@@ -57,23 +63,29 @@
       <div id="box-score">
         <div id="detal-score">
           <h3 class="over-game">Over game</h3>
-          <div>
-            <div class="">
-              <p>Score</p>
-              <p id="result-score">0</p>
-            </div>
+          <div class="d-flex gap-3 jus-between">
             <div>
-              <p>Best</p>
-              <p id="best-score">0</p>
+              <div class="">
+                <p>Score</p>
+                <p id="result-score">0</p>
+              </div>
+              <div>
+                <p>Best</p>
+                <p id="best-score">0</p>
+              </div>
             </div>
-          </div>
-          <div>
-            <p>Color Grass</p>
-            <input type="color" />
-          </div>
-          <div>
-            <p>Color Chicken</p>
-            <input type="color" id="colorPicker" />
+            <div class="wrapper">
+              <p>
+                High Scores
+              </p>
+              <table id="highScoreTable">
+                <tr>
+                  <th>Pos</th>
+                  <th>Name</th>
+                  <th>Score</th>
+                </tr>
+              </table>
+            </div>
           </div>
         </div>
         <div id="start">

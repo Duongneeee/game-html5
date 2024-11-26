@@ -4,6 +4,7 @@ const mainContentDOM = document.getElementById('main-content');
 const screen1DOM =  document.querySelector('.screen-1');
 const usernameInput = document.getElementById('username');
 const boxScoreDOM =  document.getElementById('box-score');
+const highScoreTable = document.querySelector("#highScoreTable");
 
 window.onload = function() {
     const savedUsername = localStorage.getItem("username-stick-hero");  // Lấy giá trị từ localStorage
@@ -400,12 +401,13 @@ document.querySelector('.login').addEventListener("click",()=>{
               detalScoreDOM.style.display = "block";
               document.body.style.cursor = "default";
               resultScoreDOM.innerText = score;
-        
+              saveHighScore(score)
               const localStorageScore = localStorage.getItem("stick-hero-best-score") || 0;
               if (score > localStorageScore) {
                   localStorage.setItem("stick-hero-best-score", score);
               }
               bestScoreDOM.innerHTML = score > localStorageScore ? score : localStorageScore;
+              
           }
           
           // Returns the platform the stick hit (if it didn't hit any stick then return undefined)
@@ -768,6 +770,48 @@ document.querySelector('.login').addEventListener("click",()=>{
         
           // Gọi hàm khởi tạo các sự kiện khi trang được tải
           initGameEvents();
+
+        // Lưu điểm vào danh sách
+    function saveHighScore(value) {
+        let highScores = JSON.parse(localStorage.getItem('stick-hero-highScores')) || [];
+        const name = localStorage.getItem("username-stick-hero");
+        const score = parseInt(value);
+  
+        if (name && !isNaN(score)) {
+          const isDuplicate = highScores.some(entry => entry.name === name && entry.score === score);
+          if (!isDuplicate) {
+            // Thêm điểm mới vào danh sách
+            highScores.push({ name, score });
+          }
+      
+          // Sắp xếp danh sách theo điểm giảm dần
+          highScores.sort((a, b) => b.score - a.score);
+      
+          // Chỉ giữ lại 5 điểm cao nhất
+          highScores = highScores.slice(0, 5);
+  
+          // Lưu vào localStorage
+          localStorage.setItem('stick-hero-highScores', JSON.stringify(highScores));
+      
+          // Hiển thị lại bảng điểm
+          displayHighScores(highScores);
+        }
+      }
+      
+      function displayHighScores(highScores) {
+        while (highScoreTable.rows.length > 1) {
+          highScoreTable.deleteRow(1);
+        }
+        highScores.forEach((entry, index) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${entry.name}</td>
+            <td>${entry.score}</td>
+          `;
+          highScoreTable.appendChild(row);
+        });
+      }
     }
 })
   

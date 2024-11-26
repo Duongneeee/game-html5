@@ -5,8 +5,28 @@
   --secondary: hsl(233deg 36% 38%);
 }
 
+.d-flex {
+  display: flex;
+}
+
+.gap-2 {
+  gap: 12px;
+}
+
+.gap-3 {
+  gap: 1rem;
+}
+
+.jus-between {
+  justify-content: space-between;
+}
+
+
+
 .first-body {
-  font-family: 'Inter';
+  font-family: "Jaro", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
   user-select: none;
   overflow-y: hidden;
   display: flex;
@@ -39,6 +59,7 @@
   gap: 0.5em;
   border-radius: 20px;
   color: hsl(0deg 0% 30%);
+  font-size: x-large;
 }
 
 /* .screen-1 .email {
@@ -53,7 +74,7 @@
 .screen-1 .email input::placeholder, 
 .screen-1 .password input::placeholder {
   color: hsl(0deg 0% 0%);
-  font-size: 0.9em;
+  font-size: 1em;
 }
 
 .screen-1 .email ion-icon, 
@@ -134,7 +155,7 @@ body {
 }
 
 #detal-score {
-  width: 300px;
+  min-width: 200px;
   min-height: 150px;
   padding: 16px;
   border-radius: 16px;
@@ -171,6 +192,72 @@ button {
   font-family: inherit;
   font-size: inherit;
 }
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* align-items: center; */
+}
+
+table {
+font-size: 14px;
+border-radius: 10px;
+border-spacing: 0;
+text-align: center;
+}
+
+/* caption {
+  margin-bottom: 7px;
+  font-size: 20px;
+} */
+
+th {
+background: rgba(255,137,0,0.9);
+padding: 10px 20px;
+  color: rgba(129, 69, 0, 1);
+}
+th, td {
+border-style: solid;
+border-width: 0 1px 1px 0;
+border-color: rgba(0,0,0,0.1);
+}
+
+th:first-child {
+border-top-left-radius: 5px;
+}
+th:last-child {
+border-top-right-radius: 5px;
+border-right: none;
+}
+th:first-child, td:first-child {
+padding: 7px 8px;
+}
+
+td {
+  padding: 7px 20px;
+  background: rgba(230,230,230,1);
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.player td {
+  color: rgba(0, 0, 0, 1.0);
+  font-weight: bold;
+  background: rgba(215, 215, 215, 1);
+  color: rgba(0, 0, 0, 0.8);
+  
+}
+
+tr:last-child td:first-child {
+border-radius: 0 0 0 5px;
+}
+tr:last-child td:last-child {
+border-radius: 0 0 5px 0;
+}
+tr td:last-child {
+border-right: none;
+}
+
 #controlls {
   position: absolute;
   min-width: 100%;

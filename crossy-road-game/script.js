@@ -10,6 +10,7 @@ const bodyDOM = document.querySelector('body');
 const mainContentDOM = document.getElementById('main-content');
 const screen1DOM =  document.querySelector('.screen-1');
 const usernameInput = document.getElementById('username');
+const highScoreTable = document.querySelector("#highScoreTable");
 
 window.onload = function() {
   const savedUsername = localStorage.getItem("username-crossy-road-game");  // Lấy giá trị từ localStorage
@@ -613,12 +614,17 @@ document.querySelector('.login').addEventListener("click",()=>{
     //   endDOM.style.visibility = "hidden";
     // });
     
+    // biến xác định lần đầu chơi game
+    let isFirstStartGame = false;
     document.querySelector("#start-game").addEventListener("click", () => {
-      lanes.forEach((lane) => scene.remove(lane.mesh));
-      resetGameValues();
+      if(isFirstStartGame){
+        lanes.forEach((lane) => scene.remove(lane.mesh));
+        resetGameValues();
+      }
       counterDOM.innerHTML = 0;
       boxScoreDOM.style.visibility = "hidden";
       detalScoreDOM.style.visibility = "hidden";
+      isFirstStartGame = true;
     });
     
     document
@@ -933,14 +939,55 @@ document.querySelector('.login').addEventListener("click",()=>{
       if (currentLane > localStorageScore) {
         localStorage.setItem('crossy-road-best-score', currentLane);
       }
-    
+      saveHighScore(currentLane)
       bestScoreDOM.innerHTML = Math.max(currentLane, localStorageScore);
       resultScoreDOM.innerHTML = currentLane;
       boxScoreDOM.style.visibility = "visible";
       detalScoreDOM.style.visibility = "visible";
     }
+
+    // Lưu điểm vào danh sách
+    function saveHighScore(value) {
+      let highScores = JSON.parse(localStorage.getItem('crossy-road-game-highScores')) || [];
+      const name = localStorage.getItem("username-crossy-road-game");
+      const score = parseInt(value);
+
+      if (name && !isNaN(score)) {
+        const isDuplicate = highScores.some(entry => entry.name === name && entry.score === score);
+        if (!isDuplicate) {
+          // Thêm điểm mới vào danh sách
+          highScores.push({ name, score });
+        }
     
+        // Sắp xếp danh sách theo điểm giảm dần
+        highScores.sort((a, b) => b.score - a.score);
     
+        // Chỉ giữ lại 5 điểm cao nhất
+        highScores = highScores.slice(0, 5);
+
+        // Lưu vào localStorage
+        localStorage.setItem('crossy-road-game-highScores', JSON.stringify(highScores));
+    
+        // Hiển thị lại bảng điểm
+        displayHighScores(highScores);
+      }
+    }
+    
+    function displayHighScores(highScores) {
+      while (highScoreTable.rows.length > 1) {
+        highScoreTable.deleteRow(1);
+      }
+      highScores.forEach((entry, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${entry.name}</td>
+          <td>${entry.score}</td>
+        `;
+        highScoreTable.appendChild(row);
+      });
+    }
+
     requestAnimationFrame(animate);
   }
 })
